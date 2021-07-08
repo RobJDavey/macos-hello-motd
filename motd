@@ -1,0 +1,37 @@
+#!/usr/bin/env sh
+
+if test "$(uname)" != "Darwin"; then
+    # Not running on macOS
+    exit 0
+fi
+
+if ! command -v brew >/dev/null 2>&1; then
+    echo "Homebrew missing, installing…"
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || exit 1
+fi
+
+if ! command -v figlet >/dev/null 2>&1; then
+    echo "FIGlet missing, installing…"
+    brew install figlet || exit 2
+fi
+
+if ! command -v lolcat >/dev/null 2>&1; then
+    echo "lolcat missing, installing…"
+    brew install lolcat || exit 3
+fi
+
+MOTD_SEED=${MOTD_SEED:-0}
+MOTD_WIDTH="$(tput cols)"
+MOTD_HEAD_FONT=nvscript
+MOTD_SUBHEAD_FONT=term
+
+MOTD_HEAD=$(figlet -c -w "$MOTD_WIDTH" -f "$MOTD_HEAD_FONT" "hello" | grep '[^[:blank:]]')
+MOTD_SUBHEAD=$(figlet -c -w "$MOTD_WIDTH" -f "$MOTD_SUBHEAD_FONT" "$(sw_vers -productName) $(sw_vers -productVersion) ($(sw_vers -buildVersion))")
+
+MOTD_MESSAGE="
+$MOTD_HEAD
+
+$MOTD_SUBHEAD"
+
+echo "$MOTD_MESSAGE" |
+    lolcat -S "$MOTD_SEED"
